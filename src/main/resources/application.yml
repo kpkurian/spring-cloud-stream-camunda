@@ -1,0 +1,19 @@
+spring:
+  cloud:
+    stream:
+      binders:
+        local_rabbit:
+          type: rabbit
+          environment:
+            spring:
+              rabbitmq:
+                host: 127.0.0.1
+                port: 5672
+                username: guest
+                password: guest
+            
+      bindings:
+        input:
+          binder: local_rabbit
+          destination: wf-exchange #This is for incoming message
+          group: wf-request
