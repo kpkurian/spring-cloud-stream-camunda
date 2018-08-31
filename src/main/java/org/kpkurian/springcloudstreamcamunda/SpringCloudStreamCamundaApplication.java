@@ -28,7 +28,23 @@ public class SpringCloudStreamCamundaApplication {
 
 	@Autowired
 	private CamundaRuntimeServiceSpringAware runtimeServiceWrapper;
-
+	
+	@Bean
+	public CamundaRuntimeServiceSpringAware camundaRuntimeServiceSpringAware(RuntimeService runtimeService) {
+		return new CamundaRuntimeServiceSpringAware(runtimeService);
+	}
+	
+	@EventListener
+	private void processPostDeploy(PostDeployEvent event) {
+		log.info("Camunda Initialized... CamundaRuntimeServiceSpringAware is in running state");
+		this.runtimeServiceWrapper.start();
+	}
+	
+	@EventListener
+	private void processPostAppContextLoaded(ContextRefreshedEvent contextRefreshedEvent) {
+		log.info("Spring App Context Initialized/Refreshed...");
+	}
+	
 	@StreamListener(Sink.INPUT)
 	public void onNewMessage(String message) {
 
@@ -37,24 +53,13 @@ public class SpringCloudStreamCamundaApplication {
 
 	}
 
-	@EventListener
-	private void processPostDeploy(PostDeployEvent event) {
-		log.info("Camunda Initialized...");
-	}
 	
-	@EventListener
-	private void processPostAppContextLoaded(ContextRefreshedEvent contextRefreshedEvent) {
-		log.info("Spring App Context Initialized/Refreshed...");
-	}
 	
 	private void startWf(String message) {
 		runtimeServiceWrapper.getRuntimeService().startProcessInstanceByKey("Simple_BPMN");
 		log.info("started wf for message ..." + message);
 	}
 	
-	@Bean
-	public CamundaRuntimeServiceSpringAware camundaRuntimeServiceSpringAware(RuntimeService runtimeService) {
-		return new CamundaRuntimeServiceSpringAware(runtimeService);
-	}
+	
 
 }

@@ -3,12 +3,11 @@ package org.kpkurian.springcloudstreamcamunda;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.camunda.bpm.engine.RuntimeService;
-import org.camunda.bpm.spring.boot.starter.event.PostDeployEvent;
-import org.springframework.context.event.EventListener;
+import org.springframework.context.Lifecycle;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CamundaRuntimeServiceSpringAware {
+public class CamundaRuntimeServiceSpringAware  implements Lifecycle{
 	
 	private static Log log = LogFactory.getLog(CamundaRuntimeServiceSpringAware.class);
 	
@@ -29,8 +28,7 @@ public class CamundaRuntimeServiceSpringAware {
 					log.info("sleeping ...");
 					Thread.sleep(2*1000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.info("Got Interrupted Exception ... ", e);
 				}
 				log.info("checking again ..."+isRunning);
 			}while(!isRunning);
@@ -38,10 +36,23 @@ public class CamundaRuntimeServiceSpringAware {
 		}
 	}
 	
-	@EventListener
-	private void processPostDeploy(PostDeployEvent event) {
-		log.info("Camunda Initialized... CamundaRuntimeServiceSpringAware is in running state");
+
+	@Override
+	public void start() {
+		log.info("Started ....");
 		this.isRunning = true;
+	}
+
+	@Override
+	public void stop() {
+		log.info("Stopped ....");
+		this.isRunning = false;
+	}
+
+	@Override
+	public boolean isRunning() {
+		log.info("isRunning ...." + this.isRunning);
+		return this.isRunning;
 	}
 
 }
